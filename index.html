@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="BJT TECH tracks sharp New Zealand PC component prices." />
+    <title>BJT TECH — NZ PC parts, priced daily</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="announcement"><span class="pulse"></span> NZ component prices checked daily <span>•</span> GST included where listed</div>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="BJT TECH home"><span class="brand-mark">B</span><span>BJT<span class="accent">.</span>TECH</span></a>
+      <nav aria-label="Product categories">
+        <a href="#deals" data-category-link="Memory">Memory</a>
+        <a href="#deals" data-category-link="SSD">SSD</a>
+        <a href="#deals" data-category-link="Graphics card">Graphics cards</a>
+        <a href="#deals" data-category-link="AMD CPU">AMD CPU</a>
+      </nav>
+      <button class="watchlist" id="watchlistButton" type="button" aria-label="Open watchlist">Watchlist <span id="watchCount">0</span></button>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">NEW ZEALAND / PC COMPONENT TRACKER</p>
+          <h1>Build sharper.<br /><em>Spend smarter.</em></h1>
+          <p class="hero-text">The clean way to see sharp PC-part pricing across the NZ market. Five tracked deals, refreshed each day.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#deals">See today’s picks <span>↓</span></a>
+            <a class="button ghost" href="#how-it-works">How prices work</a>
+          </div>
+          <div class="hero-stats"><span><strong>04</strong> key categories</span><span><strong>05</strong> price picks</span><span><strong>24h</strong> refresh cycle</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="hero-glow"></div><div class="chip-label">BJT<br />PRICE<br />SCAN</div></div>
+      </section>
+
+      <section class="deal-section" id="deals">
+        <div class="section-heading">
+          <div><p class="eyebrow">MARKET SNAPSHOT</p><h2>Today’s sharpest tracked prices.</h2></div>
+          <p class="updated" id="updatedAt">Loading latest price snapshot…</p>
+        </div>
+        <div class="filters" role="tablist" aria-label="Filter deals">
+          <button class="filter active" data-filter="All" type="button">All deals <span>05</span></button>
+          <button class="filter" data-filter="Memory" type="button">Memory</button>
+          <button class="filter" data-filter="SSD" type="button">SSD</button>
+          <button class="filter" data-filter="Graphics card" type="button">Graphics card</button>
+          <button class="filter" data-filter="AMD CPU" type="button">AMD CPU</button>
+        </div>
+        <div class="deal-grid" id="dealGrid" aria-live="polite"></div>
+        <p class="price-note">Prices are market snapshots, not an offer from BJT TECH. Check the retailer page for delivery, stock and final price before buying.</p>
+      </section>
+
+      <section class="how-it-works" id="how-it-works">
+        <p class="eyebrow">A BETTER BENCHMARK</p>
+        <div class="workflow-heading"><h2>Price intelligence<br />without the noise.</h2><p>BJT TECH tracks comparable parts, surfaces the lowest listed price, and preserves the source link so you can make the final call.</p></div>
+        <div class="steps">
+          <article><span>01</span><h3>Collect</h3><p>Approved NZ retailer feeds are collected into one structured price list.</p></article>
+          <article><span>02</span><h3>Compare</h3><p>Products are matched by model and specification, not only by title.</p></article>
+          <article><span>03</span><h3>Refresh</h3><p>A scheduled daily run updates the published snapshot and timestamp.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer><a class="brand" href="#top"><span class="brand-mark">B</span><span>BJT<span class="accent">.</span>TECH</span></a><p>NZ PC parts, made easier to compare.</p><p>© <span id="year"></span> BJT TECH</p></footer>
+    <dialog id="watchDialog"><button class="dialog-close" id="closeDialog" aria-label="Close">×</button><p class="eyebrow">WATCHLIST</p><h2>Your saved deals</h2><div id="watchItems"></div><p class="dialog-empty" id="emptyWatchlist">Save a deal to watch its next price update.</p></dialog>
+    <script src="app.js"></script>
+  </body>
+</html>

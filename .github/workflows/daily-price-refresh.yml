@@ -1,0 +1,23 @@
+name: Daily price refresh
+on:
+  schedule:
+    - cron: '0 19 * * *' # 08:00 NZST while daylight saving is active
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/update-prices.mjs
+        env:
+          PRICE_FEED_URL: ${{ secrets.PRICE_FEED_URL }}
+      - run: |
+          git config user.name "BJT TECH Price Bot"
+          git config user.email "price-bot@users.noreply.github.com"
+          git add data/products.json
+          git diff --cached --quiet || git commit -m "chore: refresh daily NZ price snapshot"
+          git push
