@@ -1,0 +1,10 @@
+{
+  "updatedAt": "2026-10-02T08:00:00+13:00",
+  "products": [
+    {"id":"ram-fury-8","category":"Memory","art":"ram","name":"Kingston FURY Beast RGB DDR5 8GB","spec":"DDR5 · 6000MHz · desktop memory","price":300.96,"retailer":"NZ market listing","url":"https://pricespy.co.nz/product.php?p=13850087"},
+    {"id":"ssd-pny-500","category":"SSD","art":"ssd","name":"PNY CS900 500GB","spec":"2.5-inch SATA III · 500GB","price":155.25,"retailer":"NZ market listing","url":"https://pricespy.co.nz/s/ssd-drives-500gb/"},
+    {"id":"ssd-msi-500","category":"SSD","art":"ssd","name":"MSI Spatium M452 500GB","spec":"M.2 2280 · PCIe 4.0 NVMe","price":192.63,"retailer":"NZ market listing","url":"https://pricespy.co.nz/s/m-2-pcie-3/"},
+    {"id":"gpu-4060","category":"Graphics card","art":"gpu","name":"Gigabyte GeForce RTX 4060 Windforce OC","spec":"8GB · GDDR6 · dual fan","price":567.69,"retailer":"NZ market listing","url":"https://pricespy.co.nz/category.php?k=1243&t=39921"},
+    {"id":"cpu-5500","category":"AMD CPU","art":"cpu","name":"AMD Ryzen 5 5500","spec":"6 cores · 12 threads · AM4","price":166.75,"retailer":"NZ market listing","url":"https://pricespy.co.nz/category.php?k=500&t=1588"}
+  ]
+}
