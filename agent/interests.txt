@@ -1,0 +1,6 @@
+age 49
+city Auckland NZ
+interests PBTECH VGA 5070 PRICE 
+interests PBTECH DDR5 6000MHZ PRICE
+interests PBTECH VGA 9060 PRICE
+interests PBTECH VGA 9070 PRICE
