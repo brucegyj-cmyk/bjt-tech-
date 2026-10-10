@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { Agent, run, tool, webSearchTool } from '@openai/agents';
+import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
 const PORT = Number(process.env.PORT || 8080);
@@ -123,6 +124,57 @@ function createOpenPageTool(job) {
   });
 }
 
+function createUpdateSiteTool(job) {
+  return tool({
+    name: 'update_site',
+    description: 'Save one verified opportunity for the website. Call this exactly once for every opportunity you keep in the final opportunities list, after its official source has been checked. This always saves status as new and skips a URL that has already been saved.',
+    parameters: z.object({
+      title: z.string().min(1).describe('The opportunity name.'),
+      url: z.string().min(1).describe('The verified official source URL.'),
+      source_excerpt: z.string().min(1).describe('A concise official-source excerpt covering the checked eligibility, location, and availability evidence.'),
+      why_it_fits: z.string().min(1).describe('Why this opportunity fits the person being researched.'),
+    }),
+    async execute({ title, url, source_excerpt, why_it_fits }) {
+      try {
+        const sourceUrl = assertSafePageUrl(url).toString();
+        const supabase = createClient(envRequired('SUPABASE_URL'), envRequired('SUPABASE_SERVICE_KEY'), {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const { data: existing, error: lookupError } = await supabase
+          .from('opportunities')
+          .select('id')
+          .eq('url', sourceUrl)
+          .maybeSingle();
+        if (lookupError) throw lookupError;
+        if (existing) {
+          recordToolCall(job, 'update_site', { outcome: 'skipped', url: sourceUrl });
+          console.log(`[job ${job.id}] update_site skipped existing URL ${sourceUrl}`);
+          return JSON.stringify({ outcome: 'skipped', url: sourceUrl });
+        }
+        const { data: saved, error: insertError } = await supabase
+          .from('opportunities')
+          .insert({ title, url: sourceUrl, source_excerpt, why_it_fits, status: 'new' })
+          .select('id')
+          .single();
+        if (insertError?.code === '23505') {
+          recordToolCall(job, 'update_site', { outcome: 'skipped', url: sourceUrl });
+          console.log(`[job ${job.id}] update_site skipped existing URL ${sourceUrl}`);
+          return JSON.stringify({ outcome: 'skipped', url: sourceUrl });
+        }
+        if (insertError) throw insertError;
+        recordToolCall(job, 'update_site', { outcome: 'saved', id: saved.id, url: sourceUrl });
+        console.log(`[job ${job.id}] update_site saved ${title} ${sourceUrl}`);
+        return JSON.stringify({ outcome: 'saved', id: saved.id, url: sourceUrl, status: 'new' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        recordToolCall(job, 'update_site', { outcome: 'error', url, error: message });
+        console.error(`[job ${job.id}] update_site failed for ${url}: ${message}`);
+        return JSON.stringify({ outcome: 'error', url, error: message });
+      }
+    },
+  });
+}
+
 function createAgent(job) {
   return new Agent({
     name: 'Opportunity Research Agent',
@@ -139,10 +191,11 @@ Return concise JSON only with this shape:
   "ruledOut": [{"name":"", "reason":"", "sourceUrl":""}],
   "researchNotes":""
 }
-Every included opportunity must have short official-source excerpts in ageEvidence, locationEvidence, and availabilityEvidence. If any evidence is missing, investigate further and then rule it out rather than accepting it.`,
+Every included opportunity must have short official-source excerpts in ageEvidence, locationEvidence, and availabilityEvidence. Before adding each included opportunity to the final opportunities list, call update_site exactly once with its name as title, sourceUrl as url, whyItFits as why_it_fits, and a concise source_excerpt that combines the three verified evidence excerpts. A saved or skipped response does not change what you return: keep the opportunity in the final JSON. If saving reports an error, still return the research result as normal. If any evidence is missing, investigate further and then rule it out rather than accepting it.`,
     tools: [
       webSearchTool({ searchContextSize: 'medium', userLocation: { type: 'approximate', city: 'Auckland', country: 'NZ' } }),
       createOpenPageTool(job),
+      createUpdateSiteTool(job),
     ],
   });
 }
