@@ -183,7 +183,7 @@ function createAgent(job) {
 
 You must use web_search before open_page. Search first, then open an official source for every item you may shortlist. You have a hard budget of at most ${MAX_SEARCHES} web searches, ${MAX_PAGE_READS} page reads, and four minutes total. Use only the official organiser, host, or government/education page as final evidence. If a page cannot be read, search for another official source.
 
-For each included item, verify all three: age eligibility, location suitability, and that applications/registration are currently open. Age evidence must explicitly state an age range, adulthood, or that no age limit applies; do not infer it from words such as professional, founder, or senior. Location evidence must name the place or confirm online availability. Availability evidence must explicitly show that registration, applications, enrolment, or player intake is current. Do not assume school enrollment, qualifications, work experience, citizenship, or prior achievements. Do not invent enough items to reach five; return fewer if evidence is insufficient.
+For each included item, verify all three: age eligibility, location suitability, and that applications/registration are currently open. Age evidence must explicitly state an age range, adulthood, or that no age limit applies; do not infer it from words such as professional, founder, or senior. Location evidence must name the place or confirm online availability. Availability evidence must explicitly show that registration, applications, enrolment, or player intake is current. Do not assume school enrollment, qualifications, work experience, citizenship, or prior achievements. Do not invent enough items to reach five; return fewer if evidence is insufficient. After the tenth web search, do not call web_search again: use the sources already found to finish verification and return the final JSON.
 
 Return concise JSON only with this shape:
 {
@@ -239,13 +239,16 @@ async function runJob(job) {
       const key = event.item?.rawItem?.id || event.item?.id || JSON.stringify(event.item);
       if (seenHostedCalls.has(key)) continue;
       seenHostedCalls.add(key);
-      if (job.searches >= MAX_SEARCHES) {
-        job.controller.abort(new Error(`Search limit reached (${MAX_SEARCHES}).`));
-        break;
+      if (job.searches < MAX_SEARCHES) {
+        job.searches += 1;
+        const query = searchQueryFrom(event.item);
+        recordToolCall(job, 'web_search', { search: job.searches, ...(query ? { query } : {}) });
+      } else {
+        // A hosted web-search call can only be observed after it has started.
+        // Do not turn an over-limit call into a failed job: let the agent finish
+        // with the evidence it already collected.
+        recordToolCall(job, 'web_search_limit_reached', { limit: MAX_SEARCHES });
       }
-      job.searches += 1;
-      const query = searchQueryFrom(event.item);
-      recordToolCall(job, 'web_search', { search: job.searches, ...(query ? { query } : {}) });
     }
     await streamed.completed;
     if (job.controller.signal.aborted) throw job.controller.signal.reason || new Error('Job cancelled.');
